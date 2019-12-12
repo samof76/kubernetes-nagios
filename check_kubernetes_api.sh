@@ -50,18 +50,20 @@ fi
 
 HEALTH=$(curl -sS $SSL $CREDENTIALS_FILE $TARGET/healthz)
 BSC_HEALTH=$(curl -sS $SSL $CREDENTIALS_FILE $TARGET/healthz/poststarthook/bootstrap-controller)
-EXT_HEALTH=$(curl -sS $SSL $CREDENTIALS_FILE $TARGET/healthz/poststarthook/extensions/third-party-resources)
+ETCD_HEALTH=$(curl -sS $SSL $CREDENTIALS_FILE $TARGET/healthz/etcd)
+LOG_HEALTH=$(curl -sS $SSL $CREDENTIALS_FILE $TARGET/healthz/log)
 BSR_HEALTH=$(curl -sS $SSL $CREDENTIALS_FILE $TARGET/healthz/poststarthook/rbac/bootstrap-roles)
 
 kill -15 $PROXY_PID
 
-case "$HEALTH $BSC_HEALTH $BSR_HEALTH" in 
-	"ok ok ok") echo "OK - Kubernetes API status is OK" && exit 0;;
+case "$HEALTH $BSC_HEALTH $ETCD_HEATH $LOG_HEALTH $BSR_HEALTH" in 
+	"ok ok ok ok ok") echo "OK - Kubernetes API status is OK" && exit 0;;
 	*) 
 		echo "WARNING - Kubernetes API status is not OK!"
 		echo "/healthz - $HEALTH"
 		echo "/healthz/poststarthook/bootstrap-controller - $BSC_HEALTH"
-		echo "/healthz/poststarthook/extensions/third-party-resources - $EXT_HEALTH"
+		echo "/healthz/etcd - $ETCD_HEALTH"
+		echo "/healthz/log - $LOG_HEALTH"
 		echo "/healthz/poststarthook/rbac/bootstrap-roles - $BSR_HEALTH"
 		exit 1
 	;;
